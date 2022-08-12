@@ -38,18 +38,18 @@ import java.util.Map;
 public class PdfTest {
     public static void main(String[] args) {
         repalceData();
-        addsign();
+//        addsign();
 //        signMd5();
     }
 
     private static void signMd5() {
         try {
-            PdfWriter writer = new PdfWriter("E:\\template_new2.pdf");
-            PdfReader reader = new PdfReader("E:\\template_new.pdf");
+            PdfReader reader = new PdfReader("E:\\pdfTest\\1.pdf");
+            PdfWriter writer = new PdfWriter("E:\\pdfTest\\11.pdf");
             PdfDocument document = new PdfDocument(reader, writer);
             document.close();
-            System.out.println(SecureUtil.md5(new File("E:\\template_new.pdf")));
-            System.out.println(SecureUtil.md5(new File("E:\\template_new2.pdf")));
+            System.out.println(SecureUtil.md5(new File("E:\\pdfTest\\1.pdf")));
+            System.out.println(SecureUtil.md5(new File("E:\\pdfTest\\11.pdf")));
         } catch (Exception e) {
             System.out.println("===============失败=============");
             e.printStackTrace();
@@ -95,9 +95,9 @@ public class PdfTest {
 
     private static void repalceData() {
         try {
-            String inputFileName = "E:\\template.pdf";
-            String outputFileName = "E:\\template_new.pdf";
-            String imageFile = "E:\\tem.jpeg";
+            String inputFileName = "E:\\pdftest\\template.pdf";
+            String outputFileName = "E:\\pdftest\\template_new.pdf";
+            String imageFile = "E:\\pdftest\\tem.jpeg";
 
             PdfWriter writer = new PdfWriter(outputFileName);
             PdfReader reader = new PdfReader(inputFileName);
@@ -130,7 +130,7 @@ public class PdfTest {
             fields.get("image_1").setValue(str);
 
             //锁定表单,不让修改
-//            form.flattenFields();
+            form.flattenFields();
             document.close();
 
             System.out.println("===============PDF导出成功============="+ LocalDateTime.now());
