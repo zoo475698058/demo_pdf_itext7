@@ -1,7 +1,5 @@
 package org.example;
 
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.HashUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -19,11 +17,12 @@ import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.StampingProperties;
 import com.itextpdf.signatures.*;
-import org.bouncycastle.crypto.digests.MD5Digest;
-import org.bouncycastle.jcajce.provider.digest.MD5;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Security;
@@ -33,6 +32,7 @@ import java.util.Map;
 
 /**
  * pdf测试
+ *
  * @author Administrator
  */
 public class PdfTest {
@@ -48,6 +48,7 @@ public class PdfTest {
             PdfWriter writer = new PdfWriter("E:\\pdfTest\\11.pdf");
             PdfDocument document = new PdfDocument(reader, writer);
             document.close();
+
             System.out.println(SecureUtil.md5(new File("E:\\pdfTest\\1.pdf")));
             System.out.println(SecureUtil.md5(new File("E:\\pdfTest\\11.pdf")));
         } catch (Exception e) {
@@ -74,7 +75,7 @@ public class PdfTest {
             PdfReader reader = new PdfReader(inputFileName);
             PdfSigner signer = new PdfSigner(reader, new FileOutputStream(outputFileName), new StampingProperties());
 
-            ImageData image= ImageDataFactory.create(imageFile);
+            ImageData image = ImageDataFactory.create(imageFile);
             PdfSignatureAppearance appearance = signer.getSignatureAppearance();
             appearance.setSignatureGraphic(image).setRenderingMode(PdfSignatureAppearance.RenderingMode.GRAPHIC);
             signer.setFieldName("Signature1");
@@ -86,7 +87,7 @@ public class PdfTest {
 
             signer.signDetached(digest, pks, chain, null, null, null, 0, PdfSigner.CryptoStandard.CMS);
 
-            System.out.println("===============PDF签名成功============="+ LocalDateTime.now());
+            System.out.println("===============PDF签名成功=============" + LocalDateTime.now());
         } catch (Exception e) {
             System.out.println("===============PDF签名失败=============");
             e.printStackTrace();
@@ -111,7 +112,7 @@ public class PdfTest {
             PdfAcroForm form = PdfAcroForm.getAcroForm(document, true);
             Map<String, PdfFormField> fields = form.getFormFields();
 
-            for (String key:maps.keySet()) {
+            for (String key : maps.keySet()) {
                 PdfFormField field = fields.get(key);
                 if (field != null) {
                     field.setValue((String) maps.get(key)).setFont(font);
@@ -129,11 +130,11 @@ public class PdfTest {
             String str = Base64.encodeBytes(StreamUtil.inputStreamToArray(is));
             fields.get("image_1").setValue(str);
 
-            //锁定表单,不让修改
+            //表单扁平化到文件模式
             form.flattenFields();
             document.close();
 
-            System.out.println("===============PDF导出成功============="+ LocalDateTime.now());
+            System.out.println("===============PDF导出成功=============" + LocalDateTime.now());
         } catch (Exception e) {
             System.out.println("===============PDF导出失败=============");
             e.printStackTrace();
