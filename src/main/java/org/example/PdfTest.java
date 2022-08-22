@@ -60,13 +60,13 @@ public class PdfTest {
 
                 PdfPKCS7 pkcs7 = util.readSignatureData(signName, "BC");
                 X509Certificate certificate = pkcs7.getSigningCertificate();
-                System.out.println("签名日期时间："+pkcs7.getSignDate().getTime());
-                System.out.println("证书有效期开始时间："+certificate.getNotBefore());
-                System.out.println("证书有效期："+certificate.getNotAfter());
-                System.out.println("证书名称："+certificate.getSubjectDN().getName());
+                System.out.println("证书主题DN："+certificate.getSubjectDN().getName());
                 System.out.println("证书序列号："+certificate.getSerialNumber().toString(16));
-                System.out.println("证书格式："+certificate.getPublicKey().getFormat());
+                System.out.println("证书有效开始时间："+certificate.getNotBefore());
+                System.out.println("证书有效截止时间："+certificate.getNotAfter());
                 System.out.println("证书颁发者："+certificate.getIssuerDN().getName());
+                System.out.println("证书格式："+certificate.getPublicKey().getFormat());
+                System.out.println("签名日期时间："+pkcs7.getSignDate().getTime());
             }
 
             System.out.println("===============PDF获取签名成功=============" + LocalDateTime.now());
