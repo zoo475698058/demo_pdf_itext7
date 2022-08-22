@@ -1,5 +1,6 @@
 package org.example;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -12,10 +13,7 @@ import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.io.util.StreamUtil;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfReader;
-import com.itextpdf.kernel.pdf.PdfWriter;
-import com.itextpdf.kernel.pdf.StampingProperties;
+import com.itextpdf.kernel.pdf.*;
 import com.itextpdf.signatures.*;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -27,7 +25,9 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -37,9 +37,44 @@ import java.util.Map;
  */
 public class PdfTest {
     public static void main(String[] args) {
-        repalceData();
+//        repalceData();
 //        addsign();
+//        getSign();
 //        signMd5();
+
+    }
+
+    private static void getSign() {
+        try {
+            String inputFileName = "E:\\pdftest\\t2.pdf";
+            PdfReader reader = new PdfReader(inputFileName);
+            PdfDocument document = new PdfDocument(reader);
+
+            SignatureUtil util = new SignatureUtil(document);
+            List<String> signList = util.getSignatureNames();
+            Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+            for (String signName : signList) {
+                PdfSignature signature = util.getSignature(signName);
+                System.out.println("签名原因："+signature.getReason());
+                System.out.println("签名位置："+signature.getLocation());
+
+                PdfPKCS7 pkcs7 = util.readSignatureData(signName, "BC");
+                X509Certificate certificate = pkcs7.getSigningCertificate();
+                System.out.println("签名日期时间："+pkcs7.getSignDate().getTime());
+                System.out.println("证书有效期开始时间："+certificate.getNotBefore());
+                System.out.println("证书有效期："+certificate.getNotAfter());
+                System.out.println("证书名称："+certificate.getSubjectDN().getName());
+                System.out.println("证书序列号："+certificate.getSerialNumber().toString(16));
+                System.out.println("证书格式："+certificate.getPublicKey().getFormat());
+                System.out.println("证书颁发者："+certificate.getIssuerDN().getName());
+            }
+
+            System.out.println("===============PDF获取签名成功=============" + LocalDateTime.now());
+        } catch (Exception e) {
+            System.out.println("===============PDF获取签名失败=============");
+            e.printStackTrace();
+        }
+
     }
 
     private static void signMd5() {
@@ -49,8 +84,11 @@ public class PdfTest {
             PdfDocument document = new PdfDocument(reader, writer);
             document.close();
 
+            FileUtil.copy("E:\\pdfTest\\11.pdf", "E:\\pdfTest\\22.pdf", true);
+
             System.out.println(SecureUtil.md5(new File("E:\\pdfTest\\1.pdf")));
             System.out.println(SecureUtil.md5(new File("E:\\pdfTest\\11.pdf")));
+            System.out.println(SecureUtil.md5(new File("E:\\pdfTest\\22.pdf")));
         } catch (Exception e) {
             System.out.println("===============失败=============");
             e.printStackTrace();
@@ -59,11 +97,11 @@ public class PdfTest {
 
     private static void addsign() {
         try {
-            String inputFileName = "E:\\template_new.pdf";
-            String outputFileName = "E:\\template_new2.pdf";
-            String privateKey = "E:\\tem.pfx";
+            String inputFileName = "E:\\pdftest\\template_new.pdf";
+            String outputFileName = "E:\\pdftest\\template_new2.pdf";
+            String privateKey = "E:\\pdftest\\tem.pfx";
             char[] pass = "123456".toCharArray();
-            String imageFile = "E:\\tem.png";
+            String imageFile = "E:\\pdftest\\tem.png";
 
             KeyStore ks = KeyStore.getInstance("pkcs12");
             FileInputStream fis = new FileInputStream(privateKey);
@@ -78,6 +116,7 @@ public class PdfTest {
             ImageData image = ImageDataFactory.create(imageFile);
             PdfSignatureAppearance appearance = signer.getSignatureAppearance();
             appearance.setSignatureGraphic(image).setRenderingMode(PdfSignatureAppearance.RenderingMode.GRAPHIC);
+            appearance.setReason("原因").setLocation("位置");
             signer.setFieldName("Signature1");
 
             BouncyCastleProvider provider = new BouncyCastleProvider();
@@ -131,7 +170,7 @@ public class PdfTest {
             fields.get("image_1").setValue(str);
 
             //表单扁平化到文件模式
-            form.flattenFields();
+//            form.flattenFields();
             document.close();
 
             System.out.println("===============PDF导出成功=============" + LocalDateTime.now());
