@@ -39,14 +39,14 @@ public class PdfTest {
     public static void main(String[] args) {
 //        repalceData();
 //        addsign();
-//        getSign();
+        getSign();
 //        signMd5();
 
     }
 
     private static void getSign() {
         try {
-            String inputFileName = "E:\\pdftest\\t2.pdf";
+            String inputFileName = "E:\\pdftest\\template_new5.pdf";
             PdfReader reader = new PdfReader(inputFileName);
             PdfDocument document = new PdfDocument(reader);
 
@@ -54,6 +54,8 @@ public class PdfTest {
             List<String> signList = util.getSignatureNames();
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
             for (String signName : signList) {
+                System.out.println("signName："+signName);
+                System.out.println("签名覆盖全文档："+util.signatureCoversWholeDocument(signName));
                 PdfSignature signature = util.getSignature(signName);
                 System.out.println("签名原因："+signature.getReason());
                 System.out.println("签名位置："+signature.getLocation());
@@ -67,6 +69,8 @@ public class PdfTest {
                 System.out.println("证书颁发者："+certificate.getIssuerDN().getName());
                 System.out.println("证书格式："+certificate.getPublicKey().getFormat());
                 System.out.println("签名日期时间："+pkcs7.getSignDate().getTime());
+                System.out.println("签名有效性："+pkcs7.verifySignatureIntegrityAndAuthenticity());
+                System.out.println("-----------------------------------------------------");
             }
 
             System.out.println("===============PDF获取签名成功=============" + LocalDateTime.now());
