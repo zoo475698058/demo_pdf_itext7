@@ -1,5 +1,6 @@
 package org.example;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.json.JSONObject;
@@ -46,7 +47,7 @@ public class PdfTest {
 
     private static void getSign() {
         try {
-            String inputFileName = "E:\\pdftest\\template_new5.pdf";
+            String inputFileName = "E:\\pdftest\\template_new4.pdf";
             PdfReader reader = new PdfReader(inputFileName);
             PdfDocument document = new PdfDocument(reader);
 
@@ -54,22 +55,22 @@ public class PdfTest {
             List<String> signList = util.getSignatureNames();
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
             for (String signName : signList) {
-                System.out.println("signName："+signName);
-                System.out.println("签名覆盖全文档："+util.signatureCoversWholeDocument(signName));
+                System.out.println("signName：" + signName);
+                System.out.println("签名覆盖全文档：" + util.signatureCoversWholeDocument(signName));
                 PdfSignature signature = util.getSignature(signName);
-                System.out.println("签名原因："+signature.getReason());
-                System.out.println("签名位置："+signature.getLocation());
+                System.out.println("签名原因：" + signature.getReason());
+                System.out.println("签名位置：" + signature.getLocation());
 
                 PdfPKCS7 pkcs7 = util.readSignatureData(signName, "BC");
                 X509Certificate certificate = pkcs7.getSigningCertificate();
-                System.out.println("证书主题DN："+certificate.getSubjectDN().getName());
-                System.out.println("证书序列号："+certificate.getSerialNumber().toString(16));
-                System.out.println("证书有效开始时间："+certificate.getNotBefore());
-                System.out.println("证书有效截止时间："+certificate.getNotAfter());
-                System.out.println("证书颁发者："+certificate.getIssuerDN().getName());
-                System.out.println("证书格式："+certificate.getPublicKey().getFormat());
-                System.out.println("签名日期时间："+pkcs7.getSignDate().getTime());
-                System.out.println("签名有效性："+pkcs7.verifySignatureIntegrityAndAuthenticity());
+                System.out.println("证书主题DN：" + certificate.getSubjectDN().getName());
+                System.out.println("证书序列号：" + certificate.getSerialNumber().toString(16));
+                System.out.println("证书有效开始时间：" + DateUtil.formatDateTime(certificate.getNotBefore()));
+                System.out.println("证书有效截止时间：" + DateUtil.formatDateTime(certificate.getNotAfter()));
+                System.out.println("证书颁发者：" + certificate.getIssuerDN().getName());
+                System.out.println("证书格式：" + certificate.getPublicKey().getFormat());
+                System.out.println("签名日期时间：" + DateUtil.formatDateTime(pkcs7.getSignDate().getTime()));
+                System.out.println("签名有效性：" + pkcs7.verifySignatureIntegrityAndAuthenticity());
                 System.out.println("-----------------------------------------------------");
             }
 
