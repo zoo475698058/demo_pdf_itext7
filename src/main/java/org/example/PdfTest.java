@@ -7,14 +7,23 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.itextpdf.commons.utils.Base64;
 import com.itextpdf.forms.PdfAcroForm;
-import com.itextpdf.forms.fields.PdfFormField;
+import com.itextpdf.forms.PdfSigFieldLock;
+import com.itextpdf.forms.fields.*;
 import com.itextpdf.io.font.PdfEncodings;
+import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.io.util.StreamUtil;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
+import com.itextpdf.kernel.geom.PageSize;
+import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.*;
+import com.itextpdf.kernel.pdf.annot.PdfTextAnnotation;
+import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
+import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.signatures.*;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -40,9 +49,54 @@ public class PdfTest {
     public static void main(String[] args) {
 //        repalceData();
 //        addsign();
-        getSign();
+//        getSign();
 //        signMd5();
+//        canvas();
+    }
 
+    private static void canvas() {
+        try {
+            String inputFileName = "E:\\pdftest\\tem.pdf";
+            String outputFileName = "E:\\pdftest\\tem_2.pdf";
+            String imageFile = "E:\\pdftest\\seal3.png";
+
+            PdfWriter writer = new PdfWriter(outputFileName);
+            PdfReader reader = new PdfReader(inputFileName);
+            PdfDocument document = new PdfDocument(reader, writer);
+
+            PdfFont font = PdfFontFactory.createFont("Font/SongTi.otf", PdfEncodings.IDENTITY_H);
+            PdfPage page = document.getPage(1);
+            PdfAcroForm form = PdfAcroForm.getAcroForm(document, true);
+
+            //文本框
+            PdfTextFormField text = PdfTextFormField.createText(document, new Rectangle(95, 742, 180, 18), "jf_czf", "我是甲方啊 壹仟伍佰元整%啊", font, 12);
+            form.addField(text, page);
+
+            PdfTextFormField text2 = PdfTextFormField.createText(document, new Rectangle(328, 742, 200, 18), "sfzh_jf", "430382199412341234", font, 12);
+            form.addField(text2, page);
+
+            //多行文本框
+            String ttt = "多行文本框与通常的文本框相比是翔安的，普通文本框如果添加的内容超出单行能显示的内容，则此字段中的文本将会只显示一部分，其余部分被包裹。";
+            PdfTextFormField infoField = PdfTextFormField.createMultilineText(document, new Rectangle(23, 270, 520, 65), "info", ttt, font, 12);
+            form.addField(infoField, document.getPage(2));
+
+            //勾选框
+            PdfButtonFormField radio2 = PdfButtonFormField.createCheckBox(document, new Rectangle(225, 602, 14, 12), "bsmp", "Yes", PdfFormField.TYPE_CHECK);
+            form.addField(radio2, page);
+
+            //图片
+//            InputStream is = new FileInputStream(imageFile);
+//            String str = Base64.encodeBytes(StreamUtil.inputStreamToArray(is));
+//            PdfButtonFormField image = PdfFormField.createPushButton(document, new Rectangle(115, 95, 89, 89), "seal", str);
+//            form.addField(image, document.getPage(2));
+
+            form.flattenFields();
+            document.close();
+            System.out.println("===============PDF导出成功=============" + LocalDateTime.now());
+        } catch (Exception e) {
+            System.out.println("===============PDF导出失败=============");
+            e.printStackTrace();
+    }
     }
 
     private static void getSign() {
@@ -142,12 +196,12 @@ public class PdfTest {
         try {
             String inputFileName = "E:\\pdftest\\template.pdf";
             String outputFileName = "E:\\pdftest\\template_new.pdf";
-            String imageFile = "E:\\pdftest\\tem.jpeg";
+            String imageFile = "E:\\pdftest\\seal.jpeg";
 
             PdfWriter writer = new PdfWriter(outputFileName);
             PdfReader reader = new PdfReader(inputFileName);
             PdfDocument document = new PdfDocument(reader, writer);
-            PdfFont font = PdfFontFactory.createFont("Font/SIMYOU.TTF", PdfEncodings.IDENTITY_H);
+            PdfFont font = PdfFontFactory.createFont("Font/SongTi.otf", PdfEncodings.IDENTITY_H);
 
             String jsonS = "{\"fill_1\":\"测试甲方\",\"fill_5\":\"测试乙方\",\"fill_9\":\"测试丙方\",\"fill_2\":\"1111111111111111\",\"fill_6\":\"2222222222222222\",\"undefined\":\"测试门店号\",\"fill_11\":\"0731-11111111\",\"fill_12\":\"人民中路222号\",\"fill_13\":\"ABC123456\",\"fill_14\":\"测试甲方\",\"fill_15\":\"199\",\"fill_16\":\"住宅\",\"fill_6_2\":\"√\",\"fill_7_2\":\"自定义条约1111\",\"fill_8_2\":\"自定义条约2222\",\"fill_9_2\":\"2022年五月二十日\"}";
             JSONObject maps = JSONUtil.parseObj(jsonS);
