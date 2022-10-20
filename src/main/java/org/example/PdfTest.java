@@ -22,6 +22,7 @@ import com.itextpdf.kernel.pdf.*;
 import com.itextpdf.kernel.pdf.annot.PdfTextAnnotation;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
+import com.itextpdf.kernel.pdf.xobject.PdfImageXObject;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.signatures.*;
@@ -85,10 +86,9 @@ public class PdfTest {
             form.addField(radio2, page);
 
             //图片
-//            InputStream is = new FileInputStream(imageFile);
-//            String str = Base64.encodeBytes(StreamUtil.inputStreamToArray(is));
-//            PdfButtonFormField image = PdfFormField.createPushButton(document, new Rectangle(115, 95, 89, 89), "seal", str);
-//            form.addField(image, document.getPage(2));
+            PdfCanvas canvas = new PdfCanvas(document.getPage(2));
+            ImageData image = ImageDataFactory.create(imageFile);
+            canvas.addImageFittedIntoRectangle(image, new Rectangle(115, 95, 89, 89), false);
 
             form.flattenFields();
             document.close();
