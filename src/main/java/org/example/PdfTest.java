@@ -52,7 +52,7 @@ public class PdfTest {
 //        addsign();
 //        getSign();
 //        signMd5();
-//        canvas();
+        canvas();
     }
 
     private static void canvas() {
@@ -60,24 +60,25 @@ public class PdfTest {
             String inputFileName = "E:\\pdftest\\tem.pdf";
             String outputFileName = "E:\\pdftest\\tem_2.pdf";
             String imageFile = "E:\\pdftest\\seal3.png";
+            String gouFile = "E:\\pdftest\\gou.png";
 
             PdfWriter writer = new PdfWriter(outputFileName);
             PdfReader reader = new PdfReader(inputFileName);
             PdfDocument document = new PdfDocument(reader, writer);
 
-            PdfFont font = PdfFontFactory.createFont("Font/SongTi.otf", PdfEncodings.IDENTITY_H);
+            PdfFont font = PdfFontFactory.createFont("Font/simsun.ttf", PdfEncodings.IDENTITY_H);
             PdfPage page = document.getPage(1);
             PdfAcroForm form = PdfAcroForm.getAcroForm(document, true);
 
             //文本框
-            PdfTextFormField text = PdfTextFormField.createText(document, new Rectangle(95, 742, 180, 18), "jf_czf", "我是甲方啊 壹仟伍佰元整%啊", font, 12);
+            PdfTextFormField text = PdfTextFormField.createText(document, new Rectangle(95, 742, 200, 26), "jf_czf", "我是甲方啊 壹仟伍佰元整%啊", font, 24);
             form.addField(text, page);
 
-            PdfTextFormField text2 = PdfTextFormField.createText(document, new Rectangle(328, 742, 200, 18), "sfzh_jf", "430382199412341234", font, 12);
+            PdfTextFormField text2 = PdfTextFormField.createText(document, new Rectangle(328, 742, 200, 14), "sfzh_jf", "430382199412341234", font, 12);
             form.addField(text2, page);
 
             //多行文本框
-            String ttt = "多行文本框与通常的文本框相比是翔安的，普通文本框如果添加的内容超出单行能显示的内容，则此字段中的文本将会只显示一部分，其余部分被包裹。";
+            String ttt = "多行文本框与通常的文本框相比是会换行的，普通文本框如果添加的内容超出单行能显示的内容，则此字段中的文本将会只显示一部分，其余部分被包裹。";
             PdfTextFormField infoField = PdfTextFormField.createMultilineText(document, new Rectangle(23, 270, 520, 65), "info", ttt, font, 12);
             form.addField(infoField, document.getPage(2));
 
@@ -85,10 +86,13 @@ public class PdfTest {
             PdfButtonFormField radio2 = PdfButtonFormField.createCheckBox(document, new Rectangle(225, 602, 14, 12), "bsmp", "Yes", PdfFormField.TYPE_CHECK);
             form.addField(radio2, page);
 
+            //勾选图片
+            PdfCanvas canvas1 = new PdfCanvas(document.getPage(1));
+            canvas1.addImageFittedIntoRectangle(ImageDataFactory.create(gouFile), new Rectangle(200, 602, 30, 30), false);
+
             //图片
-            PdfCanvas canvas = new PdfCanvas(document.getPage(2));
-            ImageData image = ImageDataFactory.create(imageFile);
-            canvas.addImageFittedIntoRectangle(image, new Rectangle(115, 95, 89, 89), false);
+            PdfCanvas canvas2 = new PdfCanvas(document.getPage(2));
+            canvas2.addImageFittedIntoRectangle(ImageDataFactory.create(imageFile), new Rectangle(115, 95, 89, 89), false);
 
             form.flattenFields();
             document.close();
