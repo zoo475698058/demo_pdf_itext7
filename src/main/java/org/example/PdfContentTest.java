@@ -98,7 +98,7 @@ public class PdfContentTest {
                         ImageData img = ImageDataFactory.create(gouImgFile);
                         float w = img.getWidth() * pdi;
                         float h = img.getHeight() * pdi;
-                        canvas.addImageFittedIntoRectangle(img, new Rectangle(x, y, w, h), false);
+                        canvas.addImageFittedIntoRectangle(img, new Rectangle(x, y-h+2, w, h), false);
                     } else if (imgTypeList.contains(type)) {
                         if (!blockContent.hasNonNull("src") || !blockContent.hasNonNull("w") || !blockContent.hasNonNull("h")) {
                             System.out.println("src|w|h 属性不存在, type: " + type + ", blocks：" + j + ", pageNum: " + pageNum);
@@ -118,7 +118,7 @@ public class PdfContentTest {
                         int size = blockContent.hasNonNull("size") ? blockContent.get("size").asInt() : defaultFontSize;
                         float w = blockContent.hasNonNull("w") ? blockContent.get("w").asInt() * pdi : (width - x);
                         float h = blockContent.hasNonNull("h") ? blockContent.get("h").asInt() * pdi : (size + 2);
-                        PdfTextFormField field = PdfTextFormField.createMultilineText(document, new Rectangle(x, y, w, h), "text_" + i + "_" + j, text, font, size);
+                        PdfTextFormField field = PdfTextFormField.createMultilineText(document, new Rectangle(x, y-h+4, w, h), "text_" + i + "_" + j, text, font, size);
                         form.addField(field, page);
                     }
 
