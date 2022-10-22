@@ -27,7 +27,8 @@ public class PdfContentTest {
     public static ObjectMapper objectMapper = new ObjectMapper();
     public static List<String> imgList = Arrays.asList("barcode");
     public static List<String> gouList = Arrays.asList("checkBox", "radio", "linkageCheckbox");
-    public static List<String> textList = Arrays.asList("time", "input", "mtext", "select", "regular", "textarea", "time2", "amountAdd", "associationSelect", "linkageSelect", "newRegular");
+    public static List<String> textList = Arrays.asList("time", "input", "select", "regular", "textarea", "time2", "amountAdd", "associationSelect", "linkageSelect", "newRegular");
+    public static List<String> mtextList = Arrays.asList("mtext");
     public static List<String> otherList = Arrays.asList("sign", "seal", "img", "baseColor");
 
     public static void main(String[] args) {
@@ -121,9 +122,20 @@ public class PdfContentTest {
                         }
                         String text = blockContent.get("text").asText();
                         int size = blockContent.hasNonNull("size") ? blockContent.get("size").asInt() : defaultFontSize;
-                        float w = blockContent.hasNonNull("w") ? blockContent.get("w").asInt() * pdi : (width - x);
-                        float h = blockContent.hasNonNull("h") ? blockContent.get("h").asInt() * pdi : size;
-                        PdfTextFormField field = PdfTextFormField.createMultilineText(document, new Rectangle(x, y - h + 2, w, h + 2), "text_" + i + "_" + j, text, font, size);
+                        float w = width - x;
+                        float h = size + 2;
+                        PdfTextFormField field = PdfTextFormField.createText(document, new Rectangle(x, y - h, w, h), "text_" + i + "_" + j, text, font, size);
+                        form.addField(field, page);
+                    } else if (mtextList.contains(type)) {
+                        if (!blockContent.hasNonNull("text") || !blockContent.hasNonNull("w") || !blockContent.hasNonNull("h")) {
+                            System.out.println("text|w|h属性不存在, type: " + type + ", blocks：" + j + ", pageNum: " + pageNum);
+                            continue;
+                        }
+                        String text = blockContent.get("text").asText();
+                        int size = blockContent.hasNonNull("size") ? blockContent.get("size").asInt() : defaultFontSize;
+                        float w = blockContent.get("w").asInt() * pdi;
+                        float h = blockContent.get("h").asInt() * pdi;
+                        PdfTextFormField field = PdfTextFormField.createMultilineText(document, new Rectangle(x, y - h, w, h), "mtext_" + i + "_" + j, text, font, size);
                         form.addField(field, page);
                     } else {
                         System.out.println("未知Type, type: " + type + ", blocks：" + j + ", pageNum: " + pageNum);
