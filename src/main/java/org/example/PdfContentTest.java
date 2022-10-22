@@ -25,14 +25,16 @@ import java.util.List;
  */
 public class PdfContentTest {
     public static ObjectMapper objectMapper = new ObjectMapper();
-    public static List<String> imgTypeList = Arrays.asList("sign", "seal", "barcode", "img");
-    public static List<String> gouTypeList = Arrays.asList("checkBox", "radio", "linkageCheckbox");
+    public static List<String> imgList = Arrays.asList("barcode");
+    public static List<String> gouList = Arrays.asList("checkBox", "radio", "linkageCheckbox");
+    public static List<String> textList = Arrays.asList("time", "input", "mtext", "select", "regular", "textarea", "time2", "amountAdd", "associationSelect", "linkageSelect", "newRegular");
+    public static List<String> otherList = Arrays.asList("sign", "seal", "img", "baseColor");
 
     public static void main(String[] args) {
         try {
-            String inputFileName = "E:\\pdfTest\\168414_zf.pdf";
-            String outputFileName = "E:\\pdfTest\\168414.pdf";
-            String contentFile = "E:\\pdfTest\\168414.txt";
+            String inputFileName = "E:\\pdfTest\\168447_sf.pdf";
+            String outputFileName = "E:\\pdfTest\\168447.pdf";
+            String contentFile = "E:\\pdfTest\\168447.txt";
             String fontFile = "E:\\pdfTest\\simsun.ttf";
             String gouImgFile = "E:\\pdfTest\\gou.png";
             int defaultFontSize = 12;
@@ -75,6 +77,12 @@ public class PdfContentTest {
                 JsonNode blocks = pageContent.get("blocks");
                 for (int j = 0; j < blocks.size(); j++) {
                     JsonNode blockContent = blocks.get(j);
+                    if (blockContent.hasNonNull("hide") && blockContent.get("hide").asInt() == 1) {
+                        continue;   //隐藏的不要
+                    }
+                    if (blockContent.hasNonNull("empty") && blockContent.get("empty").asInt() == 1) {
+                        continue;   //留白的不要
+                    }
                     if (!blockContent.hasNonNull("type") || !blockContent.hasNonNull("x") || !blockContent.hasNonNull("y")) {
                         System.out.println("type|x|y 属性不存在, blocks：" + j + ", pageNum: " + pageNum);
                         continue;
@@ -84,22 +92,19 @@ public class PdfContentTest {
                     if (type.isEmpty()) {
                         continue;   //type为空的不要
                     }
+                    if (otherList.contains(type)) {
+                        continue;   //部分类型不处理
+                    }
+
                     float x = blockContent.get("x").asInt() * pdi;
                     float y = height - blockContent.get("y").asInt() * pdi;
 
-                    if (blockContent.hasNonNull("hide") && blockContent.get("hide").asInt() == 1) {
-                        continue;   //隐藏的不要
-                    }
-                    if (blockContent.hasNonNull("empty") && blockContent.get("empty").asInt() == 1) {
-                        continue;   //留白的不要
-                    }
-
-                    if (gouTypeList.contains(type)) {
+                    if (gouList.contains(type)) {
                         ImageData img = ImageDataFactory.create(gouImgFile);
                         float w = img.getWidth() * pdi;
                         float h = img.getHeight() * pdi;
-                        canvas.addImageFittedIntoRectangle(img, new Rectangle(x, y-h+2, w, h), false);
-                    } else if (imgTypeList.contains(type)) {
+                        canvas.addImageFittedIntoRectangle(img, new Rectangle(x, y - h + 2, w, h), false);
+                    } else if (imgList.contains(type)) {
                         if (!blockContent.hasNonNull("src") || !blockContent.hasNonNull("w") || !blockContent.hasNonNull("h")) {
                             System.out.println("src|w|h 属性不存在, type: " + type + ", blocks：" + j + ", pageNum: " + pageNum);
                             continue;
@@ -108,8 +113,8 @@ public class PdfContentTest {
                         float w = blockContent.get("w").asInt() * pdi;
                         float h = blockContent.get("h").asInt() * pdi;
                         ImageData img = ImageDataFactory.create(src);
-                        canvas.addImageFittedIntoRectangle(img, new Rectangle(x, y, w, h), false);
-                    } else {
+                        canvas.addImageFittedIntoRectangle(img, new Rectangle(x, y - h, w, h), false);
+                    } else if (textList.contains(type)) {
                         if (!blockContent.hasNonNull("text")) {
                             System.out.println("text属性不存在, type: " + type + ", blocks：" + j + ", pageNum: " + pageNum);
                             continue;
@@ -117,13 +122,13 @@ public class PdfContentTest {
                         String text = blockContent.get("text").asText();
                         int size = blockContent.hasNonNull("size") ? blockContent.get("size").asInt() : defaultFontSize;
                         float w = blockContent.hasNonNull("w") ? blockContent.get("w").asInt() * pdi : (width - x);
-                        float h = blockContent.hasNonNull("h") ? blockContent.get("h").asInt() * pdi : (size + 2);
-                        PdfTextFormField field = PdfTextFormField.createMultilineText(document, new Rectangle(x, y-h+4, w, h), "text_" + i + "_" + j, text, font, size);
+                        float h = blockContent.hasNonNull("h") ? blockContent.get("h").asInt() * pdi : size;
+                        PdfTextFormField field = PdfTextFormField.createMultilineText(document, new Rectangle(x, y - h + 2, w, h + 2), "text_" + i + "_" + j, text, font, size);
                         form.addField(field, page);
+                    } else {
+                        System.out.println("未知Type, type: " + type + ", blocks：" + j + ", pageNum: " + pageNum);
                     }
-
                 }
-
             }
 
             form.flattenFields();
