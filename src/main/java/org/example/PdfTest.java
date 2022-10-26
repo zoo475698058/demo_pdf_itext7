@@ -14,6 +14,8 @@ import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.io.util.StreamUtil;
+import com.itextpdf.kernel.colors.ColorConstants;
+import com.itextpdf.kernel.colors.DeviceRgb;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.geom.PageSize;
@@ -21,13 +23,18 @@ import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.*;
 import com.itextpdf.kernel.pdf.annot.PdfTextAnnotation;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
+import com.itextpdf.kernel.pdf.canvas.parser.listener.ITextChunkLocation;
+import com.itextpdf.kernel.pdf.canvas.parser.listener.TextChunk;
 import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
 import com.itextpdf.kernel.pdf.xobject.PdfImageXObject;
+import com.itextpdf.layout.Canvas;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Text;
 import com.itextpdf.signatures.*;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -61,17 +68,24 @@ public class PdfTest {
             String outputFileName = "E:\\pdftest\\tem_2.pdf";
             String imageFile = "E:\\pdftest\\seal3.png";
             String gouFile = "E:\\pdftest\\gou.png";
+            String fontFile = "E:\\pdfTest\\simsun.ttf";
 
             PdfWriter writer = new PdfWriter(outputFileName);
             PdfReader reader = new PdfReader(inputFileName);
             PdfDocument document = new PdfDocument(reader, writer);
 
-            PdfFont font = PdfFontFactory.createFont("Font/simsun.ttf", PdfEncodings.IDENTITY_H);
+            PdfFont font = PdfFontFactory.createFont(fontFile, PdfEncodings.IDENTITY_H);
             PdfPage page = document.getPage(1);
             PdfAcroForm form = PdfAcroForm.getAcroForm(document, true);
 
+            String colorHex = "#2FA2DC";
+            int[] colorArr = hexToRGB(colorHex);
             //文本框
             PdfTextFormField text = PdfTextFormField.createText(document, new Rectangle(95, 742, 200, 26), "jf_czf", "我是甲方啊 壹仟伍佰元整%啊", font, 24);
+            //字体色
+            text.setColor(new DeviceRgb(colorArr[0], colorArr[1], colorArr[2]));
+            //背景色
+            text.setBackgroundColor(new DeviceRgb(0, 0, 0));
             form.addField(text, page);
 
             PdfTextFormField text2 = PdfTextFormField.createText(document, new Rectangle(328, 742, 200, 14), "sfzh_jf", "430382199412341234", font, 12);
@@ -94,13 +108,34 @@ public class PdfTest {
             PdfCanvas canvas2 = new PdfCanvas(document.getPage(2));
             canvas2.addImageFittedIntoRectangle(ImageDataFactory.create(imageFile), new Rectangle(115, 95, 89, 89), false);
 
+            //cavens
+
+
+            //表单扁平化
             form.flattenFields();
             document.close();
             System.out.println("===============PDF导出成功=============" + LocalDateTime.now());
         } catch (Exception e) {
             System.out.println("===============PDF导出失败=============");
             e.printStackTrace();
+        }
     }
+
+    /**
+     * 颜色 16进制转RGB格式
+     *  #000000 转为 [0,0,0]
+     * @param hexStr
+     * @return
+     */
+    private static int[] hexToRGB(String hexStr){
+        if(hexStr != null && !"".equals(hexStr) && hexStr.length() == 7){
+            int[] rgb = new int[3];
+            rgb[0] = Integer.valueOf(hexStr.substring( 1, 3 ), 16);
+            rgb[1] = Integer.valueOf(hexStr.substring( 3, 5 ), 16);
+            rgb[2] = Integer.valueOf(hexStr.substring( 5, 7 ), 16);
+            return rgb;
+        }
+        return new int[]{0,0,0};
     }
 
     private static void getSign() {
