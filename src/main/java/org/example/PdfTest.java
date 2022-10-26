@@ -29,9 +29,15 @@ import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
 import com.itextpdf.kernel.pdf.xobject.PdfImageXObject;
 import com.itextpdf.layout.Canvas;
 import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.IBlockElement;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Text;
+import com.itextpdf.layout.properties.Property;
+import com.itextpdf.layout.properties.UnitValue;
+import com.itextpdf.layout.properties.VerticalAlignment;
 import com.itextpdf.signatures.*;
+import com.sun.corba.se.spi.orbutil.fsm.FSMTest;
+import org.bouncycastle.its.ITSValidityPeriod;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.awt.*;
@@ -59,10 +65,53 @@ public class PdfTest {
 //        addsign();
 //        getSign();
 //        signMd5();
-        canvas();
+//        pdfForm();
+        Paragraph();
     }
 
-    private static void canvas() {
+    private static void Paragraph() {
+        try {
+            String inputFileName = "E:\\pdfTest\\168414_zf.pdf";
+            String outputFileName = "E:\\pdfTest\\168414.pdf";
+            String contentFile = "E:\\pdfTest\\168414.txt";
+            String gouFile = "E:\\pdftest\\gou.png";
+            String fontFile = "E:\\pdfTest\\simsun.ttf";
+
+            PdfWriter writer = new PdfWriter(outputFileName);
+            PdfReader reader = new PdfReader(inputFileName);
+            PdfDocument document = new PdfDocument(reader, writer);
+
+            PdfFont font = PdfFontFactory.createFont(fontFile, PdfEncodings.IDENTITY_H);
+            float pdi = 72f / 120f;
+            int page = 2;
+            float llx = 701*pdi;
+            float lly = (1403-1279)*pdi;
+            float width = 100;
+            int size = 12;
+
+            String colorHex = "#2FA2DC";
+            int[] colorArr = hexToRGB(colorHex);
+
+            Document doc = new Document(document);
+            //文本型
+            Paragraph pa1 = new Paragraph(new Text("我是谁").setFont(font).setFontSize(size));
+            pa1.setFixedPosition(page, llx, lly-size , width);
+            pa1.setFontColor(new DeviceRgb(colorArr[0], colorArr[1], colorArr[2]));
+            pa1.setBackgroundColor(new DeviceRgb(0, 0, 0));
+            pa1.setUnderline();
+            pa1.setBold();
+            pa1.setItalic();
+            doc.add(pa1);
+
+            document.close();
+            System.out.println("===============PDF导出成功=============" + LocalDateTime.now());
+        } catch (Exception e) {
+            System.out.println("===============PDF导出失败=============");
+            e.printStackTrace();
+        }
+    }
+
+    private static void pdfForm() {
         try {
             String inputFileName = "E:\\pdftest\\tem.pdf";
             String outputFileName = "E:\\pdftest\\tem_2.pdf";
@@ -107,9 +156,6 @@ public class PdfTest {
             //图片
             PdfCanvas canvas2 = new PdfCanvas(document.getPage(2));
             canvas2.addImageFittedIntoRectangle(ImageDataFactory.create(imageFile), new Rectangle(115, 95, 89, 89), false);
-
-            //cavens
-
 
             //表单扁平化
             form.flattenFields();
