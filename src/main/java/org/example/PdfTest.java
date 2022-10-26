@@ -93,6 +93,9 @@ public class PdfTest {
             int[] colorArr = hexToRGB(colorHex);
 
             Document doc = new Document(document);
+            PdfCanvas canvas = new PdfCanvas(document, page);
+            Canvas cav = new Canvas(canvas, new Rectangle(llx, lly-size , width, size));
+
             //文本型
             Paragraph pa1 = new Paragraph(new Text("我是谁").setFont(font).setFontSize(size));
             pa1.setFixedPosition(page, llx, lly-size , width);
@@ -101,7 +104,9 @@ public class PdfTest {
             pa1.setUnderline();
             pa1.setBold();
             pa1.setItalic();
-            doc.add(pa1);
+
+//            doc.add(pa1);
+            cav.add(pa1);
 
             document.close();
             System.out.println("===============PDF导出成功=============" + LocalDateTime.now());
