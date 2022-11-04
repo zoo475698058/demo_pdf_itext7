@@ -8,6 +8,7 @@ import com.itextpdf.forms.fields.PdfTextFormField;
 import com.itextpdf.io.font.PdfEncodings;
 import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;
+import com.itextpdf.kernel.colors.DeviceRgb;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.geom.Rectangle;
@@ -16,6 +17,9 @@ import com.itextpdf.kernel.pdf.PdfPage;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Text;
 
 import java.util.Arrays;
 import java.util.List;
@@ -33,9 +37,9 @@ public class PdfContentTest {
 
     public static void main(String[] args) {
         try {
-            String inputFileName = "E:\\pdfTest\\168447_sf.pdf";
-            String outputFileName = "E:\\pdfTest\\168447.pdf";
-            String contentFile = "E:\\pdfTest\\168447.txt";
+            String inputFileName = "E:\\pdfTest\\file\\topdf\\20221104\\test.pdf";
+            String outputFileName = "E:\\pdfTest\\file\\topdf\\20221104\\testsign.pdf";
+            String contentFile = "E:\\pdfTest\\file\\topdf\\20221104\\test.txt";
             String fontFile = "E:\\pdfTest\\simsun.ttf";
             String gouImgFile = "E:\\pdfTest\\gou.png";
             int defaultFontSize = 12;
@@ -47,8 +51,9 @@ public class PdfContentTest {
             PdfDocument document = new PdfDocument(reader, writer);
             PdfFont font = PdfFontFactory.createFont(fontFile, PdfEncodings.IDENTITY_H);
 
-            int pages = document.getNumberOfPages();
+            Document doc = new Document(document);
             PdfAcroForm form = PdfAcroForm.getAcroForm(document, true);
+            int pages = document.getNumberOfPages();
 
             String contentJson = FileUtil.readUtf8String(contentFile);
             JsonNode jsonNode = objectMapper.readTree(contentJson);
@@ -101,6 +106,14 @@ public class PdfContentTest {
                     float y = height - blockContent.get("y").asInt() * pdi;
 
                     if (gouList.contains(type)) {
+                        if (!blockContent.hasNonNull("text")) {
+                            System.out.println("text属性不存在, type: " + type + ", blocks：" + j + ", pageNum: " + pageNum);
+                            continue;
+                        }
+                        String text = blockContent.get("text").asText();
+                        if (!"√".equals(text)){
+                            continue;
+                        }
                         ImageData img = ImageDataFactory.create(gouImgFile);
                         float w = img.getWidth() * pdi;
                         float h = img.getHeight() * pdi;
@@ -121,18 +134,24 @@ public class PdfContentTest {
                             continue;
                         }
                         String text = blockContent.get("text").asText();
-                        int size = blockContent.hasNonNull("size") ? blockContent.get("size").asInt() : defaultFontSize;
+                        int size = blockContent.hasNonNull("size") ? blockContent.get("size").asInt(defaultFontSize) : defaultFontSize;
                         float w = width - x;
                         float h = size + 2;
-                        PdfTextFormField field = PdfTextFormField.createText(document, new Rectangle(x, y - h, w, h), "text_" + i + "_" + j, text, font, size);
-                        form.addField(field, page);
+                        Paragraph paragraph = new Paragraph(new Text(text).setFont(font).setFontSize(size));
+                        paragraph.setFixedPosition(pageNum, x, y-h , w);
+//                        pa1.setFontColor(new DeviceRgb(colorArr[0], colorArr[1], colorArr[2]));
+//                        pa1.setBackgroundColor(new DeviceRgb(0, 0, 0));
+//                        pa1.setBold();        //加粗
+//                        pa1.setUnderline();   //下划线
+//                        pa1.setItalic();      //斜体
+                        doc.add(paragraph);
                     } else if (mtextList.contains(type)) {
                         if (!blockContent.hasNonNull("text") || !blockContent.hasNonNull("w") || !blockContent.hasNonNull("h")) {
                             System.out.println("text|w|h属性不存在, type: " + type + ", blocks：" + j + ", pageNum: " + pageNum);
                             continue;
                         }
                         String text = blockContent.get("text").asText();
-                        int size = blockContent.hasNonNull("size") ? blockContent.get("size").asInt() : defaultFontSize;
+                        int size = blockContent.hasNonNull("size") ? blockContent.get("size").asInt(defaultFontSize) : defaultFontSize;
                         float w = blockContent.get("w").asInt() * pdi;
                         float h = blockContent.get("h").asInt() * pdi;
                         PdfTextFormField field = PdfTextFormField.createMultilineText(document, new Rectangle(x, y - h, w, h), "mtext_" + i + "_" + j, text, font, size);
@@ -142,7 +161,6 @@ public class PdfContentTest {
                     }
                 }
             }
-
             form.flattenFields();
             document.close();
 
@@ -150,5 +168,16 @@ public class PdfContentTest {
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    private static int[] hexToRGB(String hexStr){
+        if(hexStr != null && !"".equals(hexStr) && hexStr.length() == 7){
+            int[] rgb = new int[3];
+            rgb[0] = Integer.valueOf(hexStr.substring( 1, 3 ), 16);
+            rgb[1] = Integer.valueOf(hexStr.substring( 3, 5 ), 16);
+            rgb[2] = Integer.valueOf(hexStr.substring( 5, 7 ), 16);
+            return rgb;
+        }
+        return new int[]{0,0,0};
     }
 }

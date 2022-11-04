@@ -94,8 +94,8 @@ public class PdfTest {
             int[] colorArr = hexToRGB(colorHex);
 
             Document doc = new Document(document);
-            PdfCanvas canvas = new PdfCanvas(document, page);
-            Canvas cav = new Canvas(canvas, new Rectangle(llx, lly-size , width, size));
+//            PdfCanvas canvas = new PdfCanvas(document, page);
+//            Canvas cav = new Canvas(canvas, new Rectangle(llx, lly-size , width, size));
 
             //文本型
             Paragraph pa1 = new Paragraph(new Text("多行文本框与通常的文本框相比是会换行的，普通文本框如果添加的内容超出单行能显示的内容，则此字段中的文本将会只显示一部分，其余部分被包裹").setFont(font).setFontSize(size));
@@ -105,9 +105,13 @@ public class PdfTest {
             pa1.setUnderline();
             pa1.setBold();
             pa1.setItalic();
+            doc.add(pa1);
+//            cav.add(pa1);
 
-//            doc.add(pa1);
-            cav.add(pa1);
+            //勾选图片
+            PdfCanvas canvas1 = new PdfCanvas(document.getPage(1));
+            canvas1.addImageFittedIntoRectangle(ImageDataFactory.create(gouFile), new Rectangle(200, 602, 30, 30), false);
+
 
             document.close();
             System.out.println("===============PDF导出成功=============" + LocalDateTime.now());
