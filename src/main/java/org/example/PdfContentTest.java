@@ -104,7 +104,7 @@ public class PdfContentTest {
                         ImageData img = ImageDataFactory.create(gouImgFile);
                         float w = img.getWidth() * pdi;
                         float h = img.getHeight() * pdi;
-                        canvas.addImageFittedIntoRectangle(img, new Rectangle(x, y - h + 2, w, h), false);
+                        canvas.addImageFittedIntoRectangle(img, new Rectangle(x, y - h, w, h), false);
                     } else if (imgList.contains(type)) {
                         if (!blockContent.hasNonNull("src") || !blockContent.hasNonNull("w") || !blockContent.hasNonNull("h")) {
                             System.out.println("src|w|h 属性不存在, type: " + type + ", blocks：" + j + ", pageNum: " + pageNum);

@@ -30,6 +30,7 @@ import com.itextpdf.kernel.pdf.xobject.PdfImageXObject;
 import com.itextpdf.layout.Canvas;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.IBlockElement;
+import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Text;
 import com.itextpdf.layout.properties.Property;
@@ -97,7 +98,7 @@ public class PdfTest {
             Canvas cav = new Canvas(canvas, new Rectangle(llx, lly-size , width, size));
 
             //文本型
-            Paragraph pa1 = new Paragraph(new Text("我是谁").setFont(font).setFontSize(size));
+            Paragraph pa1 = new Paragraph(new Text("多行文本框与通常的文本框相比是会换行的，普通文本框如果添加的内容超出单行能显示的内容，则此字段中的文本将会只显示一部分，其余部分被包裹").setFont(font).setFontSize(size));
             pa1.setFixedPosition(page, llx, lly-size , width);
             pa1.setFontColor(new DeviceRgb(colorArr[0], colorArr[1], colorArr[2]));
             pa1.setBackgroundColor(new DeviceRgb(0, 0, 0));
