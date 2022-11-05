@@ -8,7 +8,6 @@ import com.itextpdf.forms.fields.PdfTextFormField;
 import com.itextpdf.io.font.PdfEncodings;
 import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;
-import com.itextpdf.kernel.colors.DeviceRgb;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.geom.Rectangle;
@@ -29,11 +28,11 @@ import java.util.List;
  */
 public class PdfContentTest {
     public static ObjectMapper objectMapper = new ObjectMapper();
-    public static List<String> imgList = Arrays.asList("barcode");
-    public static List<String> gouList = Arrays.asList("checkBox", "radio", "linkageCheckbox");
-    public static List<String> textList = Arrays.asList("time", "input", "select", "regular", "textarea", "time2", "amountAdd", "associationSelect", "linkageSelect", "newRegular");
-    public static List<String> mtextList = Arrays.asList("mtext");
-    public static List<String> otherList = Arrays.asList("sign", "seal", "img", "baseColor");
+    public static List<String> IMG_LIST = Arrays.asList("barcode");
+    public static List<String> GOU_LIST = Arrays.asList("checkBox", "radio", "linkageCheckbox");
+    public static List<String> TEXT_LIST = Arrays.asList("time", "input", "select", "regular", "textarea", "time2", "amountAdd", "associationSelect", "linkageSelect", "newRegular");
+    public static String MTEXT = "mtext";
+    public static List<String> OTHER_LIST = Arrays.asList("sign", "seal", "img", "baseColor");
 
     public static void main(String[] args) {
         try {
@@ -41,6 +40,8 @@ public class PdfContentTest {
             String outputFileName = "E:\\pdfTest\\file\\topdf\\20221104\\testsign.pdf";
             String contentFile = "E:\\pdfTest\\file\\topdf\\20221104\\test.txt";
             String fontFile = "E:\\pdfTest\\simsun.ttf";
+//            String fontFile = "E:\\pdfTest\\simhei.ttf";
+//            String fontFile = "E:\\pdfTest\\msyh.ttf";
             String gouImgFile = "E:\\pdfTest\\gou.png";
             int defaultFontSize = 12;
             //itext pdi 为72
@@ -98,14 +99,14 @@ public class PdfContentTest {
                     if (type.isEmpty()) {
                         continue;   //type为空的不要
                     }
-                    if (otherList.contains(type)) {
+                    if (OTHER_LIST.contains(type)) {
                         continue;   //部分类型不处理
                     }
 
                     float x = blockContent.get("x").asInt() * pdi;
                     float y = height - blockContent.get("y").asInt() * pdi;
 
-                    if (gouList.contains(type)) {
+                    if (GOU_LIST.contains(type)) {
                         if (!blockContent.hasNonNull("text")) {
                             System.out.println("text属性不存在, type: " + type + ", blocks：" + j + ", pageNum: " + pageNum);
                             continue;
@@ -118,7 +119,7 @@ public class PdfContentTest {
                         float w = img.getWidth() * pdi;
                         float h = img.getHeight() * pdi;
                         canvas.addImageFittedIntoRectangle(img, new Rectangle(x, y - h, w, h), false);
-                    } else if (imgList.contains(type)) {
+                    } else if (IMG_LIST.contains(type)) {
                         if (!blockContent.hasNonNull("src") || !blockContent.hasNonNull("w") || !blockContent.hasNonNull("h")) {
                             System.out.println("src|w|h 属性不存在, type: " + type + ", blocks：" + j + ", pageNum: " + pageNum);
                             continue;
@@ -128,7 +129,7 @@ public class PdfContentTest {
                         float h = blockContent.get("h").asInt() * pdi;
                         ImageData img = ImageDataFactory.create(src);
                         canvas.addImageFittedIntoRectangle(img, new Rectangle(x, y - h, w, h), false);
-                    } else if (textList.contains(type)) {
+                    } else if (TEXT_LIST.contains(type)) {
                         if (!blockContent.hasNonNull("text")) {
                             System.out.println("text属性不存在, type: " + type + ", blocks：" + j + ", pageNum: " + pageNum);
                             continue;
@@ -141,11 +142,17 @@ public class PdfContentTest {
                         paragraph.setFixedPosition(pageNum, x, y-h , w);
 //                        pa1.setFontColor(new DeviceRgb(colorArr[0], colorArr[1], colorArr[2]));
 //                        pa1.setBackgroundColor(new DeviceRgb(0, 0, 0));
-//                        pa1.setBold();        //加粗
-//                        pa1.setUnderline();   //下划线
-//                        pa1.setItalic();      //斜体
+                        if (blockContent.hasNonNull("B")&&blockContent.get("B").asInt()==1){
+                            paragraph.setBold();    //加粗
+                        }
+                        if (blockContent.hasNonNull("U")&&blockContent.get("U").asInt()==1) {
+                            paragraph.setUnderline();   //下划线
+                        }
+                        if (blockContent.hasNonNull("I")&&blockContent.get("I").asInt()==1) {
+                            paragraph.setItalic();      //斜体
+                        }
                         doc.add(paragraph);
-                    } else if (mtextList.contains(type)) {
+                    } else if (MTEXT.equals(type)) {
                         if (!blockContent.hasNonNull("text") || !blockContent.hasNonNull("w") || !blockContent.hasNonNull("h")) {
                             System.out.println("text|w|h属性不存在, type: " + type + ", blocks：" + j + ", pageNum: " + pageNum);
                             continue;
