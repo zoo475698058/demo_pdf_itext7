@@ -2,6 +2,7 @@ package org.example;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -52,6 +53,8 @@ import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -66,8 +69,9 @@ public class PdfTest {
 //        addsign();
 //        getSign();
 //        signMd5();
-//        pdfForm();
-        Paragraph();
+        pdfForm();
+//        Paragraph();
+
     }
 
     private static void Paragraph() {
@@ -125,7 +129,7 @@ public class PdfTest {
         try {
             String inputFileName = "E:\\pdftest\\tem.pdf";
             String outputFileName = "E:\\pdftest\\tem_2.pdf";
-            String imageFile = "E:\\pdftest\\seal3.png";
+            String imageFile = "E:\\pdftest\\seal2.png";
             String gouFile = "E:\\pdftest\\gou.png";
             String fontFile = "E:\\pdfTest\\simsun.ttf";
 
@@ -140,11 +144,14 @@ public class PdfTest {
             String colorHex = "#2FA2DC";
             int[] colorArr = hexToRGB(colorHex);
             //文本框
-            PdfTextFormField text = PdfTextFormField.createText(document, new Rectangle(95, 742, 200, 26), "jf_czf", "我是甲方啊 壹仟伍佰元整%啊", font, 24);
+            PdfTextFormField text = PdfTextFormField.createText(document, new Rectangle(95, 742, 200, 26), "jf_czf", "我是甲方啊 甲方啊 壹甲方啊 壹甲方啊 壹甲方啊 壹甲方啊 壹壹仟伍佰元整%啊", font, 24);
+            //字体大小自适应
+            text.setFontSizeAutoScale();
             //字体色
             text.setColor(new DeviceRgb(colorArr[0], colorArr[1], colorArr[2]));
             //背景色
             text.setBackgroundColor(new DeviceRgb(0, 0, 0));
+
             form.addField(text, page);
 
             PdfTextFormField text2 = PdfTextFormField.createText(document, new Rectangle(328, 742, 200, 14), "sfzh_jf", "430382199412341234", font, 12);
@@ -183,15 +190,15 @@ public class PdfTest {
      * @param hexStr
      * @return
      */
-    private static int[] hexToRGB(String hexStr){
-        if(hexStr != null && !"".equals(hexStr) && hexStr.length() == 7){
+    private static int[] hexToRGB(String hexStr) {
+        if (StrUtil.isNotEmpty(hexStr) && hexStr.length() == 7) {
             int[] rgb = new int[3];
-            rgb[0] = Integer.valueOf(hexStr.substring( 1, 3 ), 16);
-            rgb[1] = Integer.valueOf(hexStr.substring( 3, 5 ), 16);
-            rgb[2] = Integer.valueOf(hexStr.substring( 5, 7 ), 16);
+            rgb[0] = Integer.valueOf(hexStr.substring(1, 3), 16);
+            rgb[1] = Integer.valueOf(hexStr.substring(3, 5), 16);
+            rgb[2] = Integer.valueOf(hexStr.substring(5, 7), 16);
             return rgb;
         }
-        return new int[]{0,0,0};
+        return new int[]{0, 0, 0};
     }
 
     private static void getSign() {
@@ -228,6 +235,47 @@ public class PdfTest {
             System.out.println("===============PDF获取签名失败=============");
             e.printStackTrace();
         }
+
+
+//        String filePath = (String) map.get("filePath");
+//        cfca.sadk.com.itextpdf.kernel.pdf.PdfReader reader = new cfca.sadk.com.itextpdf.kernel.pdf.PdfReader(filePath);
+//        PdfDocument document = new PdfDocument(reader);
+//        SignatureUtil util = new SignatureUtil(document);
+//        List<String> signList = util.getSignatureNames();
+//        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+//
+//        List<HashMap<String, Object>> list = new ArrayList<>();
+//        for (String signName : signList) {
+//            PdfSignature signature = util.getSignature(signName);
+//            PdfPKCS7 pkcs7 = util.verifySignature(signName, "BC");
+//            X509Certificate certificate = pkcs7.getSigningCertificate();
+//
+//            HashMap<String, Object> resultMap = new HashMap<>();
+//            resultMap.put("signName", signName);
+//            resultMap.put("covers", util.signatureCoversWholeDocument(signName));
+//            resultMap.put("reason", signature.getReason());
+//            resultMap.put("location", signature.getLocation());
+//            resultMap.put("subjectDN_name", certificate.getSubjectDN().getName());
+//            resultMap.put("serialNumber", certificate.getSerialNumber().toString(16));
+//            resultMap.put("certificateBefore", DateUtil.formatDateTime(certificate.getNotBefore()));
+//            resultMap.put("certificateAfter", DateUtil.formatDateTime(certificate.getNotAfter()));
+//            resultMap.put("IssuerDN_name", certificate.getIssuerDN().getName());
+//            resultMap.put("certificate_format", certificate.getPublicKey().getFormat());
+//            resultMap.put("signDateTime", DateUtil.formatDateTime(pkcs7.getSignDate().getTime()));
+//            resultMap.put("verify", pkcs7.verify());
+//            list.add(resultMap);
+//        }
+//
+//        return R.data(list);
+
+
+
+
+
+//        cfca.sadk.com.itextpdf.kernel.pdf.PdfReader reader = new cfca.sadk.com.itextpdf.kernel.pdf.PdfReader(pdfBytes);
+//        PdfDocument document = new PdfDocument(reader);
+//        PdfCanvas canvas = new PdfCanvas(document, 2);
+//        canvas.addImage(image, new Rectangle(200, 602, 30, 30), false);
 
     }
 

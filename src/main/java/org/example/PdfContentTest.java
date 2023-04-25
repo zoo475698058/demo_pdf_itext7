@@ -1,6 +1,7 @@
 package org.example;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itextpdf.forms.PdfAcroForm;
@@ -8,6 +9,7 @@ import com.itextpdf.forms.fields.PdfTextFormField;
 import com.itextpdf.io.font.PdfEncodings;
 import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;
+import com.itextpdf.kernel.colors.DeviceRgb;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.geom.Rectangle;
@@ -30,18 +32,17 @@ public class PdfContentTest {
     public static ObjectMapper objectMapper = new ObjectMapper();
     public static List<String> IMG_LIST = Arrays.asList("barcode");
     public static List<String> GOU_LIST = Arrays.asList("checkBox", "radio", "linkageCheckbox");
-    public static List<String> TEXT_LIST = Arrays.asList("time", "input", "select", "regular", "textarea", "time2", "amountAdd", "associationSelect", "linkageSelect", "newRegular");
+    public static List<String> TEXT_LIST = Arrays.asList("time", "input", "select", "regular", "time2", "amountAdd", "associationSelect", "linkageSelect", "newRegular");
+    public static String AUTO_TEXT = "textarea";
     public static String MTEXT = "mtext";
     public static List<String> OTHER_LIST = Arrays.asList("sign", "seal", "img", "baseColor");
 
     public static void main(String[] args) {
         try {
             String inputFileName = "E:\\pdfTest\\file\\topdf\\20221104\\test.pdf";
-            String outputFileName = "E:\\pdfTest\\file\\topdf\\20221104\\testsign.pdf";
+            String outputFileName = "E:\\pdfTest\\file\\topdf\\20221104\\test1.pdf";
             String contentFile = "E:\\pdfTest\\file\\topdf\\20221104\\test.txt";
             String fontFile = "E:\\pdfTest\\simsun.ttf";
-//            String fontFile = "E:\\pdfTest\\simhei.ttf";
-//            String fontFile = "E:\\pdfTest\\msyh.ttf";
             String gouImgFile = "E:\\pdfTest\\gou.png";
             int defaultFontSize = 12;
             //itext pdi 为72
@@ -96,7 +97,7 @@ public class PdfContentTest {
                     }
 
                     String type = blockContent.get("type").asText();
-                    if (type.isEmpty()) {
+                    if (StrUtil.isEmpty(type)) {
                         continue;   //type为空的不要
                     }
                     if (OTHER_LIST.contains(type)) {
@@ -112,7 +113,7 @@ public class PdfContentTest {
                             continue;
                         }
                         String text = blockContent.get("text").asText();
-                        if (!"√".equals(text)){
+                        if (!"√".equals(text)) {
                             continue;
                         }
                         ImageData img = ImageDataFactory.create(gouImgFile);
@@ -139,19 +140,29 @@ public class PdfContentTest {
                         float w = width - x;
                         float h = size + 2;
                         Paragraph paragraph = new Paragraph(new Text(text).setFont(font).setFontSize(size));
-                        paragraph.setFixedPosition(pageNum, x, y-h , w);
-//                        pa1.setFontColor(new DeviceRgb(colorArr[0], colorArr[1], colorArr[2]));
-//                        pa1.setBackgroundColor(new DeviceRgb(0, 0, 0));
-                        if (blockContent.hasNonNull("B")&&blockContent.get("B").asInt()==1){
+                        paragraph.setFixedPosition(pageNum, x, y - h, w);
+                        if (blockContent.hasNonNull("B") && blockContent.get("B").asInt() == 1) {
                             paragraph.setBold();    //加粗
                         }
-                        if (blockContent.hasNonNull("U")&&blockContent.get("U").asInt()==1) {
+                        if (blockContent.hasNonNull("U") && blockContent.get("U").asInt() == 1) {
                             paragraph.setUnderline();   //下划线
                         }
-                        if (blockContent.hasNonNull("I")&&blockContent.get("I").asInt()==1) {
+                        if (blockContent.hasNonNull("I") && blockContent.get("I").asInt() == 1) {
                             paragraph.setItalic();      //斜体
                         }
                         doc.add(paragraph);
+                    } else if (AUTO_TEXT.equals(type)) {
+                        if (!blockContent.hasNonNull("text") || !blockContent.hasNonNull("width")) {
+                            System.out.println("text|w属性不存在, type: " + type + ", blocks：" + j + ", pageNum: " + pageNum);
+                            continue;
+                        }
+                        String text = blockContent.get("text").asText();
+                        int size = blockContent.hasNonNull("fontSize") ? blockContent.get("fontSize").asInt(defaultFontSize) : defaultFontSize;
+                        float w = blockContent.get("width").asInt() * pdi;
+                        float h = size + 2;
+                        PdfTextFormField field = PdfTextFormField.createText(document, new Rectangle(x, y - h, w, h), "textarea_" + i + "_" + j, text, font, size);
+                        field.setFontSizeAutoScale();   //字体大小自适应
+                        form.addField(field, page);
                     } else if (MTEXT.equals(type)) {
                         if (!blockContent.hasNonNull("text") || !blockContent.hasNonNull("w") || !blockContent.hasNonNull("h")) {
                             System.out.println("text|w|h属性不存在, type: " + type + ", blocks：" + j + ", pageNum: " + pageNum);
@@ -177,14 +188,4 @@ public class PdfContentTest {
         }
     }
 
-    private static int[] hexToRGB(String hexStr){
-        if(hexStr != null && !"".equals(hexStr) && hexStr.length() == 7){
-            int[] rgb = new int[3];
-            rgb[0] = Integer.valueOf(hexStr.substring( 1, 3 ), 16);
-            rgb[1] = Integer.valueOf(hexStr.substring( 3, 5 ), 16);
-            rgb[2] = Integer.valueOf(hexStr.substring( 5, 7 ), 16);
-            return rgb;
-        }
-        return new int[]{0,0,0};
-    }
 }
