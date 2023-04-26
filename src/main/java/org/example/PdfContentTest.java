@@ -39,14 +39,13 @@ public class PdfContentTest {
 
     public static void main(String[] args) {
         try {
-            String inputFileName = "E:\\pdfTest\\file\\topdf\\20221104\\test.pdf";
-            String outputFileName = "E:\\pdfTest\\file\\topdf\\20221104\\test1.pdf";
-            String contentFile = "E:\\pdfTest\\file\\topdf\\20221104\\test.txt";
+            String inputFileName = "E:\\pdfTest\\file\\topdf\\20230425\\2023042510000644727f4949c13.36579940.pdf";
+            String outputFileName = "E:\\pdfTest\\file\\topdf\\20230425\\2023042510000644727f4949c13.365799404.pdf";
+            String contentFile = "E:\\pdfTest\\file\\topdf\\20230425\\9940.txt";
             String fontFile = "E:\\pdfTest\\simsun.ttf";
             String gouImgFile = "E:\\pdfTest\\gou.png";
-            int defaultFontSize = 12;
-            //itext pdi 为72
-            float pdi = 72f / 120f;
+            int defaultFontSize = 12;       //默认字体大小
+            float pdi = 72f / 120f;     //itext pdi 为72
 
             PdfWriter writer = new PdfWriter(outputFileName);
             PdfReader reader = new PdfReader(inputFileName);
@@ -136,7 +135,7 @@ public class PdfContentTest {
                             continue;
                         }
                         String text = blockContent.get("text").asText();
-                        int size = blockContent.hasNonNull("size") ? blockContent.get("size").asInt(defaultFontSize) : defaultFontSize;
+                        float size = blockContent.hasNonNull("size") ? blockContent.get("size").asInt(defaultFontSize) : defaultFontSize;
                         float w = width - x;
                         float h = size + 2;
                         Paragraph paragraph = new Paragraph(new Text(text).setFont(font).setFontSize(size));
@@ -157,9 +156,9 @@ public class PdfContentTest {
                             continue;
                         }
                         String text = blockContent.get("text").asText();
-                        int size = blockContent.hasNonNull("fontSize") ? blockContent.get("fontSize").asInt(defaultFontSize) : defaultFontSize;
+                        float size = blockContent.hasNonNull("size") ? blockContent.get("size").asInt(defaultFontSize) : defaultFontSize;
                         float w = blockContent.get("width").asInt() * pdi;
-                        float h = size + 2;
+                        float h = size;
                         PdfTextFormField field = PdfTextFormField.createText(document, new Rectangle(x, y - h, w, h), "textarea_" + i + "_" + j, text, font, size);
                         field.setFontSizeAutoScale();   //字体大小自适应
                         form.addField(field, page);
@@ -169,7 +168,7 @@ public class PdfContentTest {
                             continue;
                         }
                         String text = blockContent.get("text").asText();
-                        int size = blockContent.hasNonNull("size") ? blockContent.get("size").asInt(defaultFontSize) : defaultFontSize;
+                        float size = blockContent.hasNonNull("size") ? blockContent.get("size").asInt(defaultFontSize) : defaultFontSize;
                         float w = blockContent.get("w").asInt() * pdi;
                         float h = blockContent.get("h").asInt() * pdi;
                         PdfTextFormField field = PdfTextFormField.createMultilineText(document, new Rectangle(x, y - h, w, h), "mtext_" + i + "_" + j, text, font, size);

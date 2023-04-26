@@ -6,6 +6,10 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.oned.Code128Writer;
 import com.itextpdf.commons.utils.Base64;
 import com.itextpdf.forms.PdfAcroForm;
 import com.itextpdf.forms.PdfSigFieldLock;
@@ -43,10 +47,7 @@ import org.bouncycastle.its.ITSValidityPeriod;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.awt.*;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Security;
@@ -89,8 +90,8 @@ public class PdfTest {
             PdfFont font = PdfFontFactory.createFont(fontFile, PdfEncodings.IDENTITY_H);
             float pdi = 72f / 120f;
             int page = 2;
-            float llx = 701*pdi;
-            float lly = (1403-1279)*pdi;
+            float llx = 701 * pdi;
+            float lly = (1403 - 1279) * pdi;
             float width = 100;
             int size = 12;
 
@@ -103,7 +104,7 @@ public class PdfTest {
 
             //文本型
             Paragraph pa1 = new Paragraph(new Text("多行文本框与通常的文本框相比是会换行的，普通文本框如果添加的内容超出单行能显示的内容，则此字段中的文本将会只显示一部分，其余部分被包裹").setFont(font).setFontSize(size));
-            pa1.setFixedPosition(page, llx, lly-size , width);
+            pa1.setFixedPosition(page, llx, lly - size, width);
             pa1.setFontColor(new DeviceRgb(colorArr[0], colorArr[1], colorArr[2]));
             pa1.setBackgroundColor(new DeviceRgb(0, 0, 0));
             pa1.setUnderline();
@@ -186,7 +187,8 @@ public class PdfTest {
 
     /**
      * 颜色 16进制转RGB格式
-     *  #000000 转为 [0,0,0]
+     * #000000 转为 [0,0,0]
+     *
      * @param hexStr
      * @return
      */
@@ -199,6 +201,19 @@ public class PdfTest {
             return rgb;
         }
         return new int[]{0, 0, 0};
+    }
+
+    private static void barCode() {
+        String code = "1234567890";
+        String filePath = "D:\\test.png";
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream();
+             OutputStream fileOut = new FileOutputStream(filePath)) {
+            BitMatrix bitMatrix = new Code128Writer().encode(code, BarcodeFormat.CODE_128, 200, 50);
+            MatrixToImageWriter.writeToStream(bitMatrix, "png", out);
+            out.writeTo(fileOut);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private static void getSign() {
@@ -267,9 +282,6 @@ public class PdfTest {
 //        }
 //
 //        return R.data(list);
-
-
-
 
 
 //        cfca.sadk.com.itextpdf.kernel.pdf.PdfReader reader = new cfca.sadk.com.itextpdf.kernel.pdf.PdfReader(pdfBytes);
